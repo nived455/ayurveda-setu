@@ -1,23 +1,10 @@
-import os
-import sys
-
-# Ensure the root directory is on the Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from streamlit.web.cli import main
-
-def handler(request, response):
-    """
-    Vercel serverless entrypoint for Streamlit.
-    """
-    sys.argv = [
-        "streamlit", 
-        "run", 
-        "main.py", 
-        "--server.port=3000", 
-        "--server.address=0.0.0.0",
-        "--server.headless=true"
-    ]
-    main()
-
-app = handler
+# A standard WSGI application that Vercel's Python runtime requires
+def app(environ, start_response):
+    data = b"Vercel Python backend is successfully deployed."
+    
+    start_response("200 OK", [
+        ("Content-Type", "text/plain"),
+        ("Content-Length", str(len(data)))
+    ])
+    
+    return iter([data])

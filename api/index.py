@@ -1,21 +1,31 @@
 import os
 import sys
 
-# Get absolute path to the project root directory
+# Ensure root directory is in sys.path
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# Ensure root directory is at the front of sys.path
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
-# Change working directory to root so relative file paths (like data/ayurveda_data.json) resolve properly
-os.chdir(ROOT_DIR)
+def handler(environ, start_response):
+    """
+    WSGI handler function for Vercel Python runtime.
+    """
+    status = '200 OK'
+    headers = [('Content-Type', 'text/html; charset=utf-8')]
+    start_response(status, headers)
+    
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head><title>Ayurveda Setu Service</title></head>
+    <body style="font-family: sans-serif; padding: 40px; text-align: center;">
+        <h1>🌿 Ayurveda Setu Web Service</h1>
+        <p>Vercel Serverless Function endpoint is active.</p>
+    </body>
+    </html>
+    """
+    return [html.encode('utf-8')]
 
-# WSGI Handler for Vercel
-def app(environ, start_response):
-    data = b"Vercel Python backend is active."
-    start_response("200 OK", [
-        ("Content-Type", "text/plain"),
-        ("Content-Length", str(len(data)))
-    ])
-    return iter([data])
+# Explicit top-level exports expected by Vercel runtime
+app = handler
+application = handler

@@ -1,0 +1,562 @@
+[
+    {
+        "id": "turmeric",
+        "name": "Turmeric",
+        "sanskrit": "Haridra",
+        "botanical": "Curcuma longa",
+        "dosha": [
+            "Pitta",
+            "Kapha"
+        ],
+        "uses": [
+            "wound healing",
+            "inflammation",
+            "joint discomfort",
+            "skin"
+        ],
+        "preparation": "Churna (powder), Paste with warm water or milk",
+        "source_text": "Charaka Samhita (Sutrasthana 25)",
+        "safety_notes": "Generally safe. High doses may upset stomach or aggravate Pitta.",
+        "historical_note": "Subject of landmark 1995 US Patent revocation by CSIR via prior art proof."
+    },
+    {
+        "id": "ashwagandha",
+        "name": "Ashwagandha",
+        "sanskrit": "Ashwagandha",
+        "botanical": "Withania somnifera",
+        "dosha": [
+            "Vata"
+        ],
+        "uses": [
+            "stress",
+            "fatigue",
+            "sleep",
+            "strength"
+        ],
+        "preparation": "Churna with warm milk or ghee",
+        "source_text": "Charaka Samhita (Chikitsasthana 1)",
+        "safety_notes": "Avoid during acute infection. High doses may cause GI distress.",
+        "historical_note": "Studied extensively for active compound withanolides."
+    },
+    {
+        "id": "holy-basil",
+        "name": "Holy Basil",
+        "sanskrit": "Tulsi",
+        "botanical": "Ocimum tenuiflorum",
+        "dosha": [
+            "Kapha",
+            "Vata"
+        ],
+        "uses": [
+            "cough",
+            "cold",
+            "respiratory",
+            "immunity"
+        ],
+        "preparation": "Infusion, Fresh leaf juice, Swarasa",
+        "source_text": "Dhanvantari Nighantu",
+        "safety_notes": "May lower blood sugar. Exercise caution if taking hypoglycemia medication."
+    },
+    {
+        "id": "brahmi",
+        "name": "Brahmi",
+        "sanskrit": "Brahmi",
+        "botanical": "Bacopa monnieri",
+        "dosha": [
+            "Pitta"
+        ],
+        "uses": [
+            "memory",
+            "focus",
+            "cognition",
+            "anxiety"
+        ],
+        "preparation": "Swarasa (fresh juice) or Medhya Rasayana",
+        "source_text": "Ashtanga Hridayam (Uttarasthana 39)",
+        "safety_notes": "May cause mild stomach upset or nausea if taken on an empty stomach.",
+        "historical_note": "Research highlights active bacosides for cognitive health."
+    },
+    {
+        "id": "neem",
+        "name": "Neem",
+        "sanskrit": "Nimba",
+        "botanical": "Azadirachta indica",
+        "dosha": [
+            "Pitta",
+            "Kapha"
+        ],
+        "uses": [
+            "skin",
+            "acne",
+            "blood purification"
+        ],
+        "preparation": "Leaf paste, Decoction, Oil application",
+        "source_text": "Sushruta Samhita (Sutrasthana 46)",
+        "safety_notes": "Not recommended during pregnancy or for small children. Bitter taste may induce mild nausea."
+    },
+    {
+        "id": "ginger",
+        "name": "Ginger",
+        "sanskrit": "Shunthi",
+        "botanical": "Zingiber officinale",
+        "dosha": [
+            "Vata",
+            "Kapha"
+        ],
+        "uses": [
+            "digestion",
+            "nausea",
+            "appetite",
+            "bloating"
+        ],
+        "preparation": "Fresh juice (Ardraka), Dry powder (Shunthi)",
+        "source_text": "Charaka Samhita (Sutrasthana 27)",
+        "safety_notes": "Use cautiously in hyperacidity, ulcers, or active bleeding conditions."
+    },
+    {
+        "id": "amla",
+        "name": "Amla",
+        "sanskrit": "Amalaki",
+        "botanical": "Phyllanthus emblica",
+        "dosha": [
+            "Tridoshic"
+        ],
+        "uses": [
+            "immunity",
+            "rejuvenation",
+            "hair",
+            "digestion"
+        ],
+        "preparation": "Fresh fruit, Churna, Chyawanprash component",
+        "source_text": "Charaka Samhita (Chikitsasthana 1:1)",
+        "safety_notes": "Very rich in vitamin C; excessive sourness may temporarily aggravate Pitta in sensitive individuals."
+    },
+    {
+        "id": "triphala",
+        "name": "Triphala",
+        "sanskrit": "Triphala",
+        "botanical": "Amalaki + Bibhitaki + Haritaki",
+        "dosha": [
+            "Tridoshic"
+        ],
+        "uses": [
+            "digestion",
+            "detox",
+            "regularity",
+            "eye health"
+        ],
+        "preparation": "Churna mixed with warm water at bedtime",
+        "source_text": "Sushruta Samhita (Sutrasthana 38)",
+        "safety_notes": "Excessive doses may cause diarrhea or abdominal cramps."
+    },
+    {
+        "id": "gotu-kola",
+        "name": "Gotu Kola",
+        "sanskrit": "Mandukaparni",
+        "botanical": "Centella asiatica",
+        "dosha": [
+            "Pitta",
+            "Kapha"
+        ],
+        "uses": [
+            "memory",
+            "circulation",
+            "skin repair",
+            "calmness"
+        ],
+        "preparation": "Fresh juice, Dried leaf powder, Decoction",
+        "source_text": "Charaka Samhita (Chikitsasthana 1:3)",
+        "safety_notes": "Extremely high doses over extended periods may affect liver function; monitor long-term use."
+    },
+    {
+        "id": "shatavari",
+        "name": "Shatavari",
+        "sanskrit": "Shatavari",
+        "botanical": "Asparagus racemosus",
+        "dosha": [
+            "Pitta",
+            "Vata"
+        ],
+        "uses": [
+            "vitality",
+            "reproductive health",
+            "lactation",
+            "cooling"
+        ],
+        "preparation": "Root powder with warm milk and ghee",
+        "source_text": "Ashtanga Hridayam (Chikitsasthana 22)",
+        "safety_notes": "Caution for individuals with kidney conditions or severe fluid retention."
+    },
+    {
+        "id": "guduchi",
+        "name": "Guduchi",
+        "sanskrit": "Amrita",
+        "botanical": "Tinospora cordifolia",
+        "dosha": [
+            "Tridoshic"
+        ],
+        "uses": [
+            "fever",
+            "immunity",
+            "liver health",
+            "gout"
+        ],
+        "preparation": "Guduchi Satva (extract powder), Swarasa, Kwath",
+        "source_text": "Charaka Samhita (Chikitsasthana 3)",
+        "safety_notes": "May lower blood glucose levels; monitor closely if taking anti-diabetic medication."
+    },
+    {
+        "id": "arjuna",
+        "name": "Arjuna",
+        "sanskrit": "Arjuna",
+        "botanical": "Terminalia arjuna",
+        "dosha": [
+            "Pitta",
+            "Kapha"
+        ],
+        "uses": [
+            "heart health",
+            "blood pressure",
+            "circulation",
+            "endurance"
+        ],
+        "preparation": "Bark powder, Arjuna Ksheerapaka (decoction with milk)",
+        "source_text": "Chakradatta (Hridroga Chikitsa)",
+        "safety_notes": "Should be taken under supervision if combined with cardiac or antihypertensive medications."
+    },
+    {
+        "id": "licorice",
+        "name": "Licorice",
+        "sanskrit": "Yashtimadhu",
+        "botanical": "Glycyrrhiza glabra",
+        "dosha": [
+            "Vata",
+            "Pitta"
+        ],
+        "uses": [
+            "sore throat",
+            "acid reflux",
+            "respiratory",
+            "voice"
+        ],
+        "preparation": "Root powder, Chew stick, Decoction",
+        "source_text": "Charaka Samhita (Sutrasthana 4)",
+        "safety_notes": "Avoid long-term overuse in individuals with high blood pressure due to potential fluid retention."
+    },
+    {
+        "id": "cardamom",
+        "name": "Cardamom",
+        "sanskrit": "Ela",
+        "botanical": "Elettaria cardamomum",
+        "dosha": [
+            "Tridoshic"
+        ],
+        "uses": [
+            "digestion",
+            "freshener",
+            "nausea",
+            "bronchial health"
+        ],
+        "preparation": "Crushed seeds in tea, Powder",
+        "source_text": "Sushruta Samhita (Sutrasthana 46)",
+        "safety_notes": "Generally safe. Excessive consumption may irritate gallstones."
+    },
+    {
+        "id": "haritaki",
+        "name": "Haritaki",
+        "sanskrit": "Haritaki",
+        "botanical": "Terminalia chebula",
+        "dosha": [
+            "Tridoshic"
+        ],
+        "uses": [
+            "digestion",
+            "longevity",
+            "detox",
+            "cognition"
+        ],
+        "preparation": "Churna with warm water or honey",
+        "source_text": "Charaka Samhita (Chikitsasthana 1:1)",
+        "safety_notes": "Avoid during pregnancy, acute exhaustion, or severe dehydration."
+    },
+    {
+        "id": "cinnamon",
+        "name": "Cinnamon",
+        "sanskrit": "Twak",
+        "botanical": "Cinnamomum verum",
+        "dosha": [
+            "Vata",
+            "Kapha"
+        ],
+        "uses": [
+            "circulation",
+            "metabolism",
+            "digestion",
+            "respiratory"
+        ],
+        "preparation": "Bark powder, Infusion in tea",
+        "source_text": "Dhanvantari Nighantu",
+        "safety_notes": "Use genuine Ceylon cinnamon; Cassia varieties contain coumarin which impacts liver health in excessive doses."
+    },
+    {
+        "id": "trikatu",
+        "name": "Trikatu",
+        "sanskrit": "Trikatu",
+        "botanical": "Pippali + Maricha + Shunthi",
+        "dosha": [
+            "Kapha"
+        ],
+        "uses": [
+            "metabolism",
+            "respiratory",
+            "digestion",
+            "sluggishness"
+        ],
+        "preparation": "Combined equal powder mix taken with honey",
+        "source_text": "Ashtanga Hridayam (Sutrasthana 6)",
+        "safety_notes": "Pitta aggravating. Avoid in hyperacidity, ulcers, or internal burning sensations."
+    },
+    {
+        "id": "aloe-vera",
+        "name": "Aloe Vera",
+        "sanskrit": "Kumari",
+        "botanical": "Aloe barbadensis",
+        "dosha": [
+            "Pitta"
+        ],
+        "uses": [
+            "skin healing",
+            "cooling",
+            "liver detox",
+            "digestion"
+        ],
+        "preparation": "Fresh inner leaf gel, Asava fermentation",
+        "source_text": "Bhavaprakasha Nighantu",
+        "safety_notes": "Avoid latex/outer skin portion during pregnancy due to potential uterine stimulation."
+    },
+    {
+        "id": "vidanga",
+        "name": "Vidanga",
+        "sanskrit": "Vidanga",
+        "botanical": "Embelia ribes",
+        "dosha": [
+            "Kapha",
+            "Vata"
+        ],
+        "uses": [
+            "parasites",
+            "digestive health",
+            "metabolism",
+            "skin"
+        ],
+        "preparation": "Fruit powder with warm water or honey",
+        "source_text": "Charaka Samhita (Vimanasthana 7)",
+        "safety_notes": "Contraindicated during pregnancy; consult a practitioner for appropriate dosage."
+    },
+    {
+        "id": "guggulu",
+        "name": "Guggulu",
+        "sanskrit": "Guggulu",
+        "botanical": "Commiphora mukul",
+        "dosha": [
+            "Vata",
+            "Kapha"
+        ],
+        "uses": [
+            "joint discomfort",
+            "cholesterol",
+            "metabolism",
+            "detox"
+        ],
+        "preparation": "Purified resin tablets or decoctions",
+        "source_text": "Sushruta Samhita (Sutrasthana 15)",
+        "safety_notes": "Avoid during pregnancy or acute inflammatory conditions; requires proper traditional purification (Shodhana)."
+    },
+    {
+        "id": "bhringraj",
+        "name": "Bhringraj",
+        "sanskrit": "Bhringaraja",
+        "botanical": "Eclipta alba",
+        "dosha": [
+            "Pitta",
+            "Kapha"
+        ],
+        "uses": [
+            "hair health",
+            "liver support",
+            "skin",
+            "rejuvenation"
+        ],
+        "preparation": "Bhringraj Taila (oil), Swarasa, Churna",
+        "source_text": "Charaka Samhita (Chikitsasthana 26)",
+        "safety_notes": "Cooling nature; may trigger cold symptoms in highly sensitive Vata/Kapha individuals when applied topically at night."
+    },
+    {
+        "id": "shankhpushpi",
+        "name": "Shankhpushpi",
+        "sanskrit": "Shankhapushpi",
+        "botanical": "Convolvulus pluricaulis",
+        "dosha": [
+            "Tridoshic"
+        ],
+        "uses": [
+            "memory",
+            "sleep",
+            "anxiety",
+            "brain tonic"
+        ],
+        "preparation": "Syrup, Decoction, Powder with warm milk",
+        "source_text": "Charaka Samhita (Chikitsasthana 1:3)",
+        "safety_notes": "May enhance sedation if combined with anti-anxiety medications; use under supervision."
+    },
+    {
+        "id": "pippali",
+        "name": "Long Pepper",
+        "sanskrit": "Pippali",
+        "botanical": "Piper longum",
+        "dosha": [
+            "Kapha",
+            "Vata"
+        ],
+        "uses": [
+            "cough",
+            "asthma",
+            "digestion",
+            "rejuvenation"
+        ],
+        "preparation": "Vardhamana Pippali Rasayana, Powder with honey",
+        "source_text": "Charaka Samhita (Chikitsasthana 1:2)",
+        "safety_notes": "Pitta aggravating in long-term continuous use without proper traditional vehicle (anupana)."
+    },
+    {
+        "id": "punarnava",
+        "name": "Punarnava",
+        "sanskrit": "Punarnava",
+        "botanical": "Boerhavia diffusa",
+        "dosha": [
+            "Tridoshic"
+        ],
+        "uses": [
+            "kidney health",
+            "fluid balance",
+            "liver detox",
+            "swelling"
+        ],
+        "preparation": "Root powder, Kwath (decoction), Arishta",
+        "source_text": "Sushruta Samhita (Sutrasthana 38)",
+        "safety_notes": "Use cautiously in severe hypertension or cardiac failure without medical monitoring."
+    },
+    {
+        "id": "kutki",
+        "name": "Kutki",
+        "sanskrit": "Katuki",
+        "botanical": "Picrorhiza kurroa",
+        "dosha": [
+            "Pitta",
+            "Kapha"
+        ],
+        "uses": [
+            "liver health",
+            "jaundice",
+            "fever",
+            "detox"
+        ],
+        "preparation": "Fine root powder with warm water or honey",
+        "source_text": "Charaka Samhita (Chikitsasthana 3)",
+        "safety_notes": "Extremely bitter; high doses act as a purgative and can cause diarrhea."
+    },
+    {
+        "id": "manjistha",
+        "name": "Manjistha",
+        "sanskrit": "Manjistha",
+        "botanical": "Rubia cordifolia",
+        "dosha": [
+            "Pitta",
+            "Kapha"
+        ],
+        "uses": [
+            "blood purification",
+            "skin health",
+            "lymphatic detox"
+        ],
+        "preparation": "Decoction, Powder, Oil application",
+        "source_text": "Sushruta Samhita (Sutrasthana 38)",
+        "safety_notes": "May temporarily color urine reddish or orange; harmless but noteworthy."
+    },
+    {
+        "id": "vasaka",
+        "name": "Malabar Nut",
+        "sanskrit": "Vasaka",
+        "botanical": "Justicia adhatoda",
+        "dosha": [
+            "Kapha",
+            "Pitta"
+        ],
+        "uses": [
+            "cough",
+            "bronchitis",
+            "respiratory",
+            "bleeding disorders"
+        ],
+        "preparation": "Swarasa (leaf juice), Syrup, Decoction",
+        "source_text": "Charaka Samhita (Chikitsasthana 16)",
+        "safety_notes": "Contains vasicine; contraindicated during pregnancy as it may cause uterine contractions."
+    },
+    {
+        "id": "bilva",
+        "name": "Bael",
+        "sanskrit": "Bilva",
+        "botanical": "Aegle marmelos",
+        "dosha": [
+            "Kapha",
+            "Vata"
+        ],
+        "uses": [
+            "diarrhea",
+            "dysentery",
+            "gut health",
+            "digestion"
+        ],
+        "preparation": "Unripe fruit powder, Fruit pulp beverage",
+        "source_text": "Charaka Samhita (Chikitsasthana 19)",
+        "safety_notes": "Ripe fruit can cause constipation if taken in high quantities over long periods."
+    },
+    {
+        "id": "fenugreek",
+        "name": "Fenugreek",
+        "sanskrit": "Methika",
+        "botanical": "Trigonella foenum-graecum",
+        "dosha": [
+            "Kapha",
+            "Vata"
+        ],
+        "uses": [
+            "blood sugar",
+            "digestion",
+            "lactation",
+            "joint health"
+        ],
+        "preparation": "Soaked seeds, Powder, Sprouted seeds",
+        "source_text": "Bhavaprakasha Nighantu",
+        "safety_notes": "Pitta aggravating in high amounts; monitor blood sugar if combined with diabetic drugs."
+    },
+    {
+        "id": "nagkesar",
+        "name": "Cobras Saffron",
+        "sanskrit": "Nagakesara",
+        "botanical": "Mesua ferrea",
+        "dosha": [
+            "Pitta",
+            "Kapha"
+        ],
+        "uses": [
+            "bleeding disorders",
+            "skin",
+            "digestion",
+            "fever"
+        ],
+        "preparation": "Flower bud powder with honey or butter",
+        "source_text": "Dhanvantari Nighantu",
+        "safety_notes": "Generally safe in recommended dosages; use under supervision during pregnancy."
+    }
+]

@@ -9,4 +9,4 @@ venv/
 .env
 
 # IDE
-.vscode/
+.vscode/.env 

@@ -1,77 +1,86 @@
 import os
-import json
-from dotenv import load_dotenv
 from google import genai
+from google.genai import types
+from PIL import Image
 
-class GroundedAyurvedaBot:
-    def __init__(self, json_path: str = "data/ayurveda_data.json"):
-        # Load environment variables
-        dotenv_path = os.path.join(os.path.dirname(__file__), "..", ".env")
-        load_dotenv(dotenv_path=dotenv_path, override=True)
+def generate_ai_response(prompt_text: str, chat_history: list = None, language: str = "English", image: Image.Image = None) -> str:
+    """
+    Generates an AI response grounded in classical Ayurvedic principles using Google Gemini API.
+    
+    Parameters:
+        prompt_text (str): The user's input query or description.
+        chat_history (list): Optional list of dicts containing prior conversation turn history.
+        language (str): Target response language (e.g., 'English', 'Hindi', 'Telugu', 'Tamil', 'Sanskrit').
+        image (PIL.Image): Optional image of a plant/herb uploaded by the user for vision analysis.
         
-        self.api_key = os.getenv("GEMINI_API_KEY") or "AQ.Ab8RN6Lxb4FZ6mX0psZrkmrXQvQ2K0vlG5x7nxfP16wcYTWiYQ"
-        
-        with open(json_path, "r", encoding="utf-8") as f:
-            self.dataset = json.load(f)
+    Returns:
+        str: AI synthesized response formatted in Markdown with structured sections.
+    """
+    # 1. Retrieve Gemini API Key from environment variables
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return (
+            "⚠️ **Configuration Error:** `GEMINI_API_KEY` was not found in environment variables. "
+            "Please check your `.env` file or environment settings."
+        )
 
-        try:
-            self.client = genai.Client(api_key=self.api_key)
-            self.use_api = True
-        except Exception:
-            self.use_api = False
+    # 2. Initialize Gemini Client
+    client = genai.Client(api_key=api_key)
 
-    def get_response(self, user_query: str, chat_history: list) -> str:
-        q = user_query.lower().strip()
+    # 3. Formulate System Instruction for Vaidya AI
+    system_instruction = f"""
+    You are 'Vaidya AI', a knowledgeable, empathetic, and responsible Ayurvedic health assistant for 'Ayurveda Setu'.
+    
+    CORE GUIDELINES:
+    1. Ground all responses in classical Ayurvedic concepts (Tridoshas: Vata, Pitta, Kapha; Agni; Ahara & Vihara).
+    2. LANGUAGE MANDATE: You MUST write the ENTIRE response strictly in the following language: {language}.
+    3. PLANT / VISION ANALYSIS: If an image is attached:
+       - Identify the medicinal plant or herb shown in the image.
+       - Describe its Ayurvedic properties (Rasa, Guna, Virya, Vipaka) and primary health uses.
+    4. RESPONSE STRUCTURE:
+       - Use clean Markdown with bold headings, bullet points, and short paragraphs.
+       - Separate recommendations into Remedies (Home Care), Diet (Ahara), and Lifestyle (Vihara).
+    5. SAFETY & MEDICAL DISCLAIMER:
+       - Do not diagnose acute modern medical emergencies or prescribe synthetic/allopathic drugs.
+       - Always include a brief recommendation advising consultation with a certified Vaidya or medical professional.
+    """
 
-        # Try live Gemini API first
-        if self.use_api:
-            try:
-                system_prompt = f"""You are Ayurveda Setu AI, an expert research assistant grounded strictly in traditional medicinal knowledge.
+    # 4. Construct Content Payload
+    contents = []
 
-CONTEXT DATASET:
-{json.dumps(self.dataset, indent=2)}
+    # Attach PIL Image if available for Vision processing
+    if image is not None:
+        contents.append(image)
+        combined_prompt = (
+            f"Please identify this medicinal plant/herb and describe its Ayurvedic properties and benefits. "
+            f"User's query: {prompt_text}"
+        )
+        contents.append(combined_prompt)
+    else:
+        # Include conversation context from chat history if provided
+        context_str = ""
+        if chat_history and len(chat_history) > 1:
+            recent_turns = chat_history[-6:] # Keep the last 3 exchanges for context depth
+            context_str = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in recent_turns[:-1]])
+            
+        if context_str:
+            full_prompt = f"Previous Conversation Context:\n{context_str}\n\nCurrent User Query: {prompt_text}"
+            contents.append(full_prompt)
+        else:
+            contents.append(prompt_text)
 
-STRICT RULES:
-1. Rely ONLY on the provided context dataset for specific remedies.
-2. If asked about a plant or remedy NOT in the dataset, reply: "This topic is not yet digitized in our current database."
-3. ALWAYS mention safety notes when discussing a plant.
-4. Keep answers professional, academic, and cautious."""
+    # 5. Call Gemini API using model gemini-2.5-flash
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=contents,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.3,
+                top_p=0.9
+            )
+        )
+        return response.text
 
-                full_prompt = f"{system_prompt}\n\nUser Question: {user_query}"
-                
-                # Using official model identifier for Google GenAI SDK
-                response = self.client.models.generate_content(
-                    model='gemini-2.5-flash',
-                    contents=full_prompt,
-                )
-                return response.text
-            except Exception as e:
-                # If API call fails or model ID isn't accessible, fall back seamlessly to local dataset query
-                pass
-
-        # Local Dataset Match Fallback (Guarantees zero crashes)
-        matched_plants = [
-            p for p in self.dataset
-            if q in p['name'].lower() 
-            or q in p['sanskrit'].lower() 
-            or q in p['botanical'].lower()
-            or any(q in u.lower() for u in p['uses'])
-            or any(q in d.lower() for d in p['dosha'])
-        ]
-
-        if not matched_plants:
-            return "This topic is not yet digitized in our current database."
-
-        res = f"### Verified Medicinal Insights ({len(matched_plants)} entries found)\n\n"
-        for plant in matched_plants:
-            res += f"#### 🌿 {plant['name']} (*{plant['sanskrit']}*)\n"
-            res += f"- **Botanical Name:** {plant['botanical']}\n"
-            res += f"- **Doshas:** {', '.join(plant.get('dosha', []))}\n"
-            res += f"- **Primary Uses:** {', '.join(plant.get('uses', []))}\n"
-            res += f"- **Classical Source:** `{plant['source_text']}`\n"
-            res += f"- **Preparation:** {plant['preparation']}\n"
-            if 'historical_note' in plant:
-                res += f"- **TKDL Note:** {plant['historical_note']}\n"
-            res += f"- **⚠️ Safety & Caution:** {plant['safety_notes']}\n\n---\n"
-
-        return res
+    except Exception as e:
+        return f"⚠️ **Error generating AI response:** {str(e)}"

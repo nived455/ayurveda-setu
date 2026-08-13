@@ -1,32 +1,56 @@
 import json
-import pandas as pd
+import os
 
-class AyurvedaSearchEngine:
-    def __init__(self, json_path: str = "data/ayurveda_data.json"):
+def search_ayurveda_data(query: str) -> list:
+    """
+    Searches the classical Ayurvedic database (data/ayurveda_data.json) for matching terms.
+    
+    Parameters:
+        query (str): Search term provided by user (e.g., 'tulsi', 'acidity', 'pitta').
+        
+    Returns:
+        list: List of matching plant/remedy dictionaries found in the dataset.
+    """
+    if not query or not query.strip():
+        return []
+
+    # Resolve absolute path to data/ayurveda_data.json relative to this file
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    json_path = os.path.join(base_dir, "data", "ayurveda_data.json")
+
+    # Return empty list if dataset file does not exist
+    if not os.path.exists(json_path):
+        return []
+
+    try:
         with open(json_path, "r", encoding="utf-8") as f:
-            self.raw_data = json.load(f)
-        self.df = pd.DataFrame(self.raw_data)
+            data = json.load(f)
+    except Exception:
+        return []
 
-    def get_all_doshas(self):
-        doshas = set()
-        for dosha_list in self.df['dosha']:
-            doshas.update(dosha_list)
-        return sorted(list(doshas))
+    query_lower = query.strip().lower()
+    results = []
 
-    def filter_data(self, query: str = "", selected_dosha: str = "All"):
-        filtered = self.raw_data
+    for item in data:
+        # Extract text fields safely
+        name = str(item.get("name", "")).lower()
+        category = str(item.get("category", "")).lower()
+        dosha = str(item.get("dosha", "")).lower()
+        description = str(item.get("description", "")).lower()
+        uses = str(item.get("uses", "")).lower()
+        preparation = str(item.get("preparation", "")).lower()
+        source_text = str(item.get("source_text", "")).lower()
 
-        if selected_dosha != "All":
-            filtered = [item for item in filtered if selected_dosha in item['dosha']]
+        # Match query against any relevant dataset field
+        if (
+            query_lower in name
+            or query_lower in category
+            or query_lower in dosha
+            or query_lower in description
+            or query_lower in uses
+            or query_lower in preparation
+            or query_lower in source_text
+        ):
+            results.append(item)
 
-        if query.strip():
-            q = query.lower()
-            filtered = [
-                item for item in filtered
-                if q in item['name'].lower()
-                or q in item['sanskrit'].lower()
-                or q in item['botanical'].lower()
-                or any(q in u.lower() for u in item['uses'])
-            ]
-
-        return filtered
+    return results

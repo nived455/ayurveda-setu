@@ -1,7 +1,6 @@
 import os
 import streamlit as st
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 from PIL import Image
 
 def generate_ai_response(
@@ -41,15 +40,13 @@ def generate_ai_response(
             "Please configure `GEMINI_API_KEY` in **Streamlit Cloud -> Manage app -> Settings -> Secrets**."
         )
 
-    # Sanitize API Key string
     clean_api_key = str(api_key).strip().strip('"').strip("'")
-    os.environ["GEMINI_API_KEY"] = clean_api_key
 
-    # 5. Initialize Gemini Client
+    # 5. Configure Gemini SDK
     try:
-        client = genai.Client(api_key=clean_api_key)
+        genai.configure(api_key=clean_api_key)
     except Exception as e:
-        return f"⚠️ **Client Initialization Error:** {str(e)}"
+        return f"⚠️ **Client Configuration Error:** {str(e)}"
 
     # 6. System Instruction for Vaidya AI
     system_instruction = f"""
@@ -69,7 +66,19 @@ def generate_ai_response(
        - Always include a brief recommendation advising consultation with a certified Vaidya or medical professional.
     """
 
-    # 7. Construct Prompt Content Payload
+    # 7. Initialize Model
+    try:
+        model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash",
+            system_instruction=system_instruction
+        )
+    except Exception:
+        model = genai.GenerativeModel(
+            model_name="gemini-1.5-pro",
+            system_instruction=system_instruction
+        )
+
+    # 8. Construct Payload & Generate Response
     contents = []
     if image is not None:
         contents.append(image)
@@ -89,24 +98,8 @@ def generate_ai_response(
         else:
             contents.append(prompt_text)
 
-    # 8. Try Active Gemini Models (2.5-flash -> 1.5-flash-8b -> 1.5-pro)
-    models_to_try = ["gemini-2.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"]
-    
-    last_error = ""
-    for model_name in models_to_try:
-        try:
-            response = client.models.generate_content(
-                model=model_name,
-                contents=contents,
-                config=types.GenerateContentConfig(
-                    system_instruction=system_instruction,
-                    temperature=0.3,
-                    top_p=0.9
-                )
-            )
-            return response.text
-        except Exception as err:
-            last_error = str(err)
-            continue
-
-    return f"⚠️ **Error generating AI response:** {last_error}"
+    try:
+        response = model.generate_content(contents)
+        return response.text
+    except Exception as e:
+        return f"⚠️ **Error generating AI response:** {str(e)}"

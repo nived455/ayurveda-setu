@@ -89,29 +89,24 @@ def generate_ai_response(
         else:
             contents.append(prompt_text)
 
-    # 8. Generate Content using google-genai SDK supported model string
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=contents,
-            config=types.GenerateContentConfig(
-                system_instruction=system_instruction,
-                temperature=0.3,
-                top_p=0.9
-            )
-        )
-        return response.text
-    except Exception as e:
-        # Fallback check if 2.5 is unavailable in current region/API tier
+    # 8. Try Active Gemini Models (2.5-flash -> 1.5-flash-8b -> 1.5-pro)
+    models_to_try = ["gemini-2.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"]
+    
+    last_error = ""
+    for model_name in models_to_try:
         try:
             response = client.models.generate_content(
-                model="gemini-2.0-flash",
+                model=model_name,
                 contents=contents,
                 config=types.GenerateContentConfig(
                     system_instruction=system_instruction,
-                    temperature=0.3
+                    temperature=0.3,
+                    top_p=0.9
                 )
             )
             return response.text
-        except Exception as fallback_error:
-            return f"⚠️ **Error generating AI response:** {str(fallback_error)}"
+        except Exception as err:
+            last_error = str(err)
+            continue
+
+    return f"⚠️ **Error generating AI response:** {last_error}"

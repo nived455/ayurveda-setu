@@ -1,67 +1,144 @@
 import streamlit as st
+import os
 from dotenv import load_dotenv
+from PIL import Image
+from streamlit_mic_recorder import speech_to_text
 
 load_dotenv()
 
-from src.search_engine import AyurvedaSearchEngine
-from src.ai_assistant import GroundedAyurvedaBot
-from src.components import render_custom_css, render_plant_card
+from src.components import load_custom_css, render_header, render_disclaimer, render_card
+from src.search_engine import search_ayurveda_data
+from src.ai_assistant import generate_ai_response
 
-st.set_page_config(page_title="Ayurveda Setu", page_icon="🌿", layout="wide")
-render_custom_css()
+# 1. Page Configuration
+st.set_page_config(
+    page_title="Ayurveda Setu: Digital Library",
+    page_icon="🌿",
+    layout="wide"
+)
 
-# Initialize search core
-search_engine = AyurvedaSearchEngine()
+load_custom_css()
 
-st.title("🌿 Ayurveda Setu: Traditional Knowledge Digital Library")
-st.caption("Digitized classical medicinal knowledge grounded with responsible AI")
+# ==========================================
+# SIDEBAR: LANGUAGE & MULTIMEDIA CONTROLS
+# ==========================================
+with st.sidebar:
+    st.markdown("### 🌐 Preferences & Controls")
+    
+    # Feature 1: Language Selector
+    selected_language = st.selectbox(
+        "Choose Language / భాష / भाषा:",
+        ["English", "Hindi (हिंदी)", "Telugu (తెలుగు)", "Tamil (తమిళం)", "Sanskrit (संस्कृतम्)"]
+    )
+    
+    st.markdown("---")
+    st.markdown("### 📸 Plant & Herb Scanner")
+    st.write("Upload or capture a photo of a medicinal plant to identify its properties.")
+    
+    # Feature 2: Image Search (File Upload or Camera)
+    image_source = st.radio("Image Input Source:", ["Upload File", "Take Photo"])
+    uploaded_image = None
+    
+    if image_source == "Upload File":
+        uploaded_file = st.file_uploader("Upload plant image:", type=["jpg", "jpeg", "png"])
+        if uploaded_file:
+            uploaded_image = Image.open(uploaded_file)
+    else:
+        camera_file = st.camera_input("Take a photo of the plant:")
+        if camera_file:
+            uploaded_image = Image.open(camera_file)
+            
+    if uploaded_image:
+        st.image(uploaded_image, caption="Selected Plant Image", use_container_width=True)
 
-tab1, tab2 = st.tabs(["🔍 Search Knowledge Base", "🤖 AI Grounded Assistant"])
+# 2. Render Main App Header
+render_header()
 
+# 3. Main Navigation Tabs
+tab1, tab2 = st.tabs(["🔍 Search Knowledge Base", "🤖 AI Grounded Assistant & Vision"])
+
+# ==========================================
+# TAB 1: KNOWLEDGE BASE & PLANT IMAGES
+# ==========================================
 with tab1:
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        search_query = st.text_input("Search by symptom, herb, or botanical name:", placeholder="e.g., wound healing, turmeric, Curcuma")
-    with col2:
-        dosha_options = ["All"] + search_engine.get_all_doshas()
-        selected_dosha = st.selectbox("Filter by Dosha:", dosha_options)
+    st.markdown("### Search Classical Ayurvedic Remedies & Plants")
+    
+    # Feature 3: Voice Search Button for Knowledge Base
+    col_input, col_voice = st.columns([0.8, 0.2])
+    
+    with col_voice:
+        st.write("🎙️ Voice Search:")
+        spoken_text = speech_to_text(language="en", start_prompt="⏺️ Record", stop_prompt="⏹️ Stop", key="kb_voice")
+        
+    with col_input:
+        default_query = spoken_text if spoken_text else ""
+        search_query = st.text_input(
+            "Enter symptom, herb, or condition (e.g., 'tulsi', 'acidity'):",
+            value=default_query,
+            key="search_input"
+        )
 
-    results = search_engine.filter_data(search_query, selected_dosha)
-    st.write(f"Showing **{len(results)}** verified entries")
+    if search_query:
+        results = search_ayurveda_data(search_query)
+        if results:
+            st.success(f"Found {len(results)} entry/entries:")
+            for item in results:
+                title = item.get("title", item.get("name", "Ayurvedic Record"))
+                category = item.get("category", "General Remedy")
+                description = item.get("description", item.get("details", "No description available."))
+                
+                # Feature 4: Display Plant Image if available in JSON dataset
+                image_url = item.get("image_url", None)
+                if image_url:
+                    st.image(image_url, caption=f"Plant: {title}", width=300)
+                    
+                render_card(title=title, content=description, tag=category)
+        else:
+            st.warning("No direct match found in the local knowledge base.")
 
-    for item in results:
-        render_plant_card(item)
-
+# ==========================================
+# TAB 2: AI CHATBOT WITH VISION & VOICE
+# ==========================================
 with tab2:
-    col_a, col_b = st.columns([4, 1])
-    with col_a:
-        st.subheader("Grounded Conversational RAG")
-        st.info("This assistant only answers queries using verified digitized entries in our dataset.")
-    with col_b:
-        if st.button("🔄 Reset Assistant"):
-            if "bot" in st.session_state:
-                del st.session_state["bot"]
-            if "messages" in st.session_state:
-                st.session_state.messages = []
-            st.rerun()
-
-    if "bot" not in st.session_state:
-        st.session_state.bot = GroundedAyurvedaBot()
+    st.markdown("### Vaidya AI: Multilingual & Vision Assistant")
+    
+    # Voice input option for chat
+    st.write("🎙️ **Voice Query (Optional):**")
+    chat_voice_text = speech_to_text(language="en", start_prompt="🎤 Speak Query", stop_prompt="⏹️ Done", key="chat_voice")
+    
+    # Chat session state
     if "messages" not in st.session_state:
-        st.session_state.messages = []
+        st.session_state.messages = [
+            {"role": "assistant", "content": f"Namaste! I am your Vaidya AI assistant. I am set to respond in **{selected_language}**. How can I help you today?"}
+        ]
 
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-    if user_input := st.chat_input("Ask about Ayurvedic remedies..."):
-        st.chat_message("user").markdown(user_input)
-        st.session_state.messages.append({"role": "user", "content": user_input})
+    # Determine user prompt from voice or typed input
+    user_prompt = st.chat_input("Describe symptoms or ask about an uploaded plant image...")
+    active_prompt = user_prompt or chat_voice_text
 
-        with st.spinner("Searching dataset & generating response..."):
-            history = [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages[:-1]]
-            answer = st.session_state.bot.get_response(user_input, history)
+    if active_prompt or uploaded_image:
+        prompt_to_use = active_prompt if active_prompt else "Analyze this plant image and tell me its Ayurvedic benefits."
+        
+        st.session_state.messages.append({"role": "user", "content": prompt_to_use})
+        with st.chat_message("user"):
+            st.markdown(prompt_to_use)
+            if uploaded_image:
+                st.image(uploaded_image, width=250)
 
         with st.chat_message("assistant"):
-            st.markdown(answer)
-        st.session_state.messages.append({"role": "assistant", "content": answer})
+            with st.spinner("Analyzing query and classical database..."):
+                response_text = generate_ai_response(
+                    prompt_text=prompt_to_use,
+                    chat_history=st.session_state.messages,
+                    language=selected_language,
+                    image=uploaded_image
+                )
+                st.markdown(response_text)
+                
+        st.session_state.messages.append({"role": "assistant", "content": response_text})
+
+render_disclaimer()

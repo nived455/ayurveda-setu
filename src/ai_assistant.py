@@ -11,94 +11,64 @@ def generate_ai_response(
     image: Image.Image = None
 ) -> str:
     """
-    Generates an AI response grounded in classical Ayurvedic principles using the Google Gemini API.
-    
-    Supports:
-      - Automatic API key resolution (Streamlit Secrets or local .env)
-      - Multilingual response generation
-      - Vision processing for uploaded/captured plant images
-      - Multi-turn conversation context
+    Generates an AI response grounded in classical Ayurvedic principles using Google Gemini API.
     """
-    # 1. Retrieve Gemini API Key from Streamlit Secrets OR Local Environment
+    # 1. Fetch API Key from Streamlit Secrets or Environment Variables
     api_key = None
     try:
         if "GEMINI_API_KEY" in st.secrets:
-            api_key = st.secrets["GEMINI_API_KEY"]
+            api_key = st.secrets["AQ.Ab8RN6Lxb4FZ6mX0psZrkmrXQvQ2K0vlG5x7nxfP16wcYTWiYQ"]
     except Exception:
         pass
 
     if not api_key:
-        api_key = os.getenv("GEMINI_API_KEY")
+        api_key = os.getenv("AQ.Ab8RN6Lxb4FZ6mX0psZrkmrXQvQ2K0vlG5x7nxfP16wcYTWiYQ")
 
-    # 2. Configuration Error Guardrail
-    if not api_key or api_key.strip() == "":
+    if not api_key or not api_key.strip():
         return (
-            "⚠️ **Configuration Error:** `GEMINI_API_KEY` was not found.\n\n"
-            "• **For Streamlit Cloud:** Go to **Manage app -> Settings (⚙️) -> Secrets** and add:\n"
-            "```toml\nGEMINI_API_KEY = \"your_actual_gemini_api_key\"\n```\n"
-            "• **For Local Development:** Add `GEMINI_API_KEY=your_key` to your `.env` file."
+            "⚠️ **Configuration Error:** `GEMINI_API_KEY` not found.\n\n"
+            "Please configure `GEMINI_API_KEY` in **Streamlit Cloud -> Manage app -> Settings -> Secrets**."
         )
 
-    # 3. Initialize Gemini Client with explicit API key
+    # Clean potential quotation marks or spaces from secret strings
+    clean_api_key = api_key.strip().strip('"').strip("'")
+
+    # 2. Set environment variable explicitly to avoid OAuth token header conflicts
+    os.environ["AQ.Ab8RN6Lxb4FZ6mX0psZrkmrXQvQ2K0vlG5x7nxfP16wcYTWiYQ"] = clean_api_key
+
     try:
-        client = genai.Client(api_key=api_key)
+        # Initialize Gemini Client using environment variable configuration
+        client = genai.Client()
     except Exception as e:
         return f"⚠️ **Client Initialization Error:** {str(e)}"
 
-    # 4. Define Vaidya AI System Instructions & Guardrails
+    # 3. System Instruction for Vaidya AI
     system_instruction = f"""
-    You are 'Vaidya AI', a knowledgeable, empathetic, and responsible Ayurvedic health assistant for 'Ayurveda Setu'.
-    
-    CORE GUIDELINES:
-    1. Ground all responses in classical Ayurvedic concepts (Tridoshas: Vata, Pitta, Kapha; Agni; Ahara & Vihara).
-    2. LANGUAGE MANDATE: You MUST write the ENTIRE response strictly in the following language: {language}.
-    3. PLANT / VISION ANALYSIS: If an image is attached:
-       - Identify the medicinal plant or herb shown in the image.
-       - Describe its Ayurvedic properties (Rasa, Guna, Virya, Vipaka) and primary health uses.
-    4. RESPONSE STRUCTURE:
-       - Use clean Markdown with bold headings, bullet points, and short paragraphs.
-       - Separate recommendations into Remedies (Home Care), Diet (Ahara), and Lifestyle (Vihara).
-    5. SAFETY & MEDICAL DISCLAIMER:
-       - Do not diagnose acute modern medical emergencies or prescribe synthetic/allopathic drugs.
-       - Always include a brief recommendation advising consultation with a certified Vaidya or medical professional.
+    You are 'Vaidya AI', an expert Ayurvedic health assistant for Ayurveda Setu.
+    - Provide responses grounded in classical Ayurvedic principles (Doshas: Vata, Pitta, Kapha, Ahara, Vihara).
+    - Always respond strictly in the requested language: {language}.
+    - If an image is provided, identify the medicinal plant/herb, describe its Ayurvedic properties (Rasa, Guna, Virya), and its common health uses.
+    - Keep answers structured with bold headers, bullet points, and safety disclaimers.
     """
 
-    # 5. Construct Prompt Content Payload
+    # 4. Build Content Payload
     contents = []
-
     if image is not None:
-        # Vision Payload: Image + Prompt
         contents.append(image)
-        combined_prompt = (
-            f"Identify this medicinal plant/herb and describe its Ayurvedic properties and benefits. "
-            f"User's query: {prompt_text}"
-        )
-        contents.append(combined_prompt)
+        contents.append(f"Identify this plant or herb and explain its Ayurvedic medicinal uses. Additional query: {prompt_text}")
     else:
-        # Text Payload with Chat History Context
-        context_str = ""
-        if chat_history and len(chat_history) > 1:
-            recent_turns = chat_history[-6:]  # Include last 3 exchanges for dialogue depth
-            context_str = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in recent_turns[:-1]])
-            
-        if context_str:
-            full_prompt = f"Previous Conversation Context:\n{context_str}\n\nCurrent User Query: {prompt_text}"
-            contents.append(full_prompt)
-        else:
-            contents.append(prompt_text)
+        contents.append(prompt_text)
 
-    # 6. Execute Model Content Generation
+    # 5. Generate Response
     try:
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=contents,
             config=types.GenerateContentConfig(
                 system_instruction=system_instruction,
-                temperature=0.3,
-                top_p=0.9
+                temperature=0.3
             )
         )
         return response.text
-
     except Exception as e:
         return f"⚠️ **Error generating AI response:** {str(e)}"

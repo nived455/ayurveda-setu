@@ -12,37 +12,47 @@ def generate_ai_response(
 ) -> str:
     """
     Generates an AI response grounded in classical Ayurvedic principles using Google Gemini API.
+    Handles API keys safely across Streamlit Cloud Secrets, OS Environment, and .env.
     """
-    # 1. Fetch API Key from Streamlit Secrets or Environment Variables
     api_key = None
+
+    # 1. Try reading directly from Streamlit Cloud Secrets
     try:
-        if "GEMINI_API_KEY" in st.secrets:
-            api_key = st.secrets["AQ.Ab8RN6Lxb4FZ6mX0psZrkmrXQvQ2K0vlG5x7nxfP16wcYTWiYQ"]
+        api_key = st.secrets["GEMINI_API_KEY"]
     except Exception:
         pass
 
+    # 2. Try reading from environment variable (dotenv / os)
     if not api_key:
-        api_key = os.getenv("AQ.Ab8RN6Lxb4FZ6mX0psZrkmrXQvQ2K0vlG5x7nxfP16wcYTWiYQ")
+        api_key = os.getenv("GEMINI_API_KEY")
 
-    if not api_key or not api_key.strip():
+    # 3. Try reading lowercase or alternative secret keys just in case
+    if not api_key:
+        try:
+            api_key = st.secrets.get("gemini_api_key", None)
+        except Exception:
+            pass
+
+    # 4. Error guardrail if key is completely missing
+    if not api_key or not str(api_key).strip():
         return (
             "⚠️ **Configuration Error:** `GEMINI_API_KEY` not found.\n\n"
             "Please configure `GEMINI_API_KEY` in **Streamlit Cloud -> Manage app -> Settings -> Secrets**."
         )
 
-    # Clean potential quotation marks or spaces from secret strings
-    clean_api_key = api_key.strip().strip('"').strip("'")
+    # Sanitize the key string
+    clean_api_key = str(api_key).strip().strip('"').strip("'")
 
-    # 2. Set environment variable explicitly to avoid OAuth token header conflicts
-    os.environ["AQ.Ab8RN6Lxb4FZ6mX0psZrkmrXQvQ2K0vlG5x7nxfP16wcYTWiYQ"] = clean_api_key
+    # Set OS environment variable explicitly so google-genai client finds it
+    os.environ["GEMINI_API_KEY"] = clean_api_key
 
+    # 5. Initialize Client
     try:
-        # Initialize Gemini Client using environment variable configuration
-        client = genai.Client()
+        client = genai.Client(api_key=clean_api_key)
     except Exception as e:
         return f"⚠️ **Client Initialization Error:** {str(e)}"
 
-    # 3. System Instruction for Vaidya AI
+    # 6. System Instruction
     system_instruction = f"""
     You are 'Vaidya AI', an expert Ayurvedic health assistant for Ayurveda Setu.
     - Provide responses grounded in classical Ayurvedic principles (Doshas: Vata, Pitta, Kapha, Ahara, Vihara).
@@ -51,7 +61,7 @@ def generate_ai_response(
     - Keep answers structured with bold headers, bullet points, and safety disclaimers.
     """
 
-    # 4. Build Content Payload
+    # 7. Build Payload
     contents = []
     if image is not None:
         contents.append(image)
@@ -59,7 +69,7 @@ def generate_ai_response(
     else:
         contents.append(prompt_text)
 
-    # 5. Generate Response
+    # 8. Generate Response
     try:
         response = client.models.generate_content(
             model="gemini-2.5-flash",

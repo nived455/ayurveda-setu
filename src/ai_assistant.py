@@ -1,33 +1,51 @@
 import os
+import streamlit as st
 from google import genai
 from google.genai import types
 from PIL import Image
 
-def generate_ai_response(prompt_text: str, chat_history: list = None, language: str = "English", image: Image.Image = None) -> str:
+def generate_ai_response(
+    prompt_text: str, 
+    chat_history: list = None, 
+    language: str = "English", 
+    image: Image.Image = None
+) -> str:
     """
-    Generates an AI response grounded in classical Ayurvedic principles using Google Gemini API.
+    Generates an AI response grounded in classical Ayurvedic principles using the Google Gemini API.
     
-    Parameters:
-        prompt_text (str): The user's input query or description.
-        chat_history (list): Optional list of dicts containing prior conversation turn history.
-        language (str): Target response language (e.g., 'English', 'Hindi', 'Telugu', 'Tamil', 'Sanskrit').
-        image (PIL.Image): Optional image of a plant/herb uploaded by the user for vision analysis.
-        
-    Returns:
-        str: AI synthesized response formatted in Markdown with structured sections.
+    Supports:
+      - Automatic API key resolution (Streamlit Secrets or local .env)
+      - Multilingual response generation
+      - Vision processing for uploaded/captured plant images
+      - Multi-turn conversation context
     """
-    # 1. Retrieve Gemini API Key from environment variables
-    api_key = os.getenv("GEMINI_API_KEY")
+    # 1. Retrieve Gemini API Key from Streamlit Secrets OR Local Environment
+    api_key = None
+    try:
+        if "GEMINI_API_KEY" in st.secrets:
+            api_key = st.secrets["GEMINI_API_KEY"]
+    except Exception:
+        pass
+
     if not api_key:
+        api_key = os.getenv("GEMINI_API_KEY")
+
+    # 2. Configuration Error Guardrail
+    if not api_key or api_key.strip() == "":
         return (
-            "⚠️ **Configuration Error:** `GEMINI_API_KEY` was not found in environment variables. "
-            "Please check your `.env` file or environment settings."
+            "⚠️ **Configuration Error:** `GEMINI_API_KEY` was not found.\n\n"
+            "• **For Streamlit Cloud:** Go to **Manage app -> Settings (⚙️) -> Secrets** and add:\n"
+            "```toml\nGEMINI_API_KEY = \"your_actual_gemini_api_key\"\n```\n"
+            "• **For Local Development:** Add `GEMINI_API_KEY=your_key` to your `.env` file."
         )
 
-    # 2. Initialize Gemini Client
-    client = genai.Client(api_key=api_key)
+    # 3. Initialize Gemini Client with explicit API key
+    try:
+        client = genai.Client(api_key=api_key)
+    except Exception as e:
+        return f"⚠️ **Client Initialization Error:** {str(e)}"
 
-    # 3. Formulate System Instruction for Vaidya AI
+    # 4. Define Vaidya AI System Instructions & Guardrails
     system_instruction = f"""
     You are 'Vaidya AI', a knowledgeable, empathetic, and responsible Ayurvedic health assistant for 'Ayurveda Setu'.
     
@@ -45,22 +63,22 @@ def generate_ai_response(prompt_text: str, chat_history: list = None, language: 
        - Always include a brief recommendation advising consultation with a certified Vaidya or medical professional.
     """
 
-    # 4. Construct Content Payload
+    # 5. Construct Prompt Content Payload
     contents = []
 
-    # Attach PIL Image if available for Vision processing
     if image is not None:
+        # Vision Payload: Image + Prompt
         contents.append(image)
         combined_prompt = (
-            f"Please identify this medicinal plant/herb and describe its Ayurvedic properties and benefits. "
+            f"Identify this medicinal plant/herb and describe its Ayurvedic properties and benefits. "
             f"User's query: {prompt_text}"
         )
         contents.append(combined_prompt)
     else:
-        # Include conversation context from chat history if provided
+        # Text Payload with Chat History Context
         context_str = ""
         if chat_history and len(chat_history) > 1:
-            recent_turns = chat_history[-6:] # Keep the last 3 exchanges for context depth
+            recent_turns = chat_history[-6:]  # Include last 3 exchanges for dialogue depth
             context_str = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in recent_turns[:-1]])
             
         if context_str:
@@ -69,7 +87,7 @@ def generate_ai_response(prompt_text: str, chat_history: list = None, language: 
         else:
             contents.append(prompt_text)
 
-    # 5. Call Gemini API using model gemini-2.5-flash
+    # 6. Execute Model Content Generation
     try:
         response = client.models.generate_content(
             model="gemini-2.5-flash",

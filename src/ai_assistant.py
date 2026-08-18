@@ -10,30 +10,21 @@ def generate_ai_response(
     image: Image.Image = None
 ) -> str:
     """
-    Generates an AI response grounded in classical Ayurvedic principles using Google Gemini API.
-    Handles API keys safely across Streamlit Cloud Secrets, OS Environment, and .env.
+    Generates an AI response grounded in classical Ayurvedic principles.
+    Dynamically discovers and selects the active supported Gemini model to prevent 404 errors.
     """
     api_key = None
 
-    # 1. Fetch API Key from Streamlit Secrets
+    # 1. Fetch API Key from Streamlit Secrets or Environment
     try:
         if "GEMINI_API_KEY" in st.secrets:
             api_key = st.secrets["GEMINI_API_KEY"]
     except Exception:
         pass
 
-    # 2. Fallback to OS Environment Variables (.env)
     if not api_key:
         api_key = os.getenv("GEMINI_API_KEY")
 
-    # 3. Fallback check for lowercase key names
-    if not api_key:
-        try:
-            api_key = st.secrets.get("gemini_api_key", None)
-        except Exception:
-            pass
-
-    # 4. Configuration Error Guardrail
     if not api_key or not str(api_key).strip():
         return (
             "⚠️ **Configuration Error:** `GEMINI_API_KEY` not found.\n\n"
@@ -42,13 +33,13 @@ def generate_ai_response(
 
     clean_api_key = str(api_key).strip().strip('"').strip("'")
 
-    # 5. Configure Gemini SDK
+    # 2. Configure Gemini SDK
     try:
         genai.configure(api_key=clean_api_key)
     except Exception as e:
         return f"⚠️ **Client Configuration Error:** {str(e)}"
 
-    # 6. System Instruction for Vaidya AI
+    # 3. System Instruction for Vaidya AI
     system_instruction = f"""
     You are 'Vaidya AI', a knowledgeable, empathetic, and responsible Ayurvedic health assistant for 'Ayurveda Setu'.
     
@@ -66,19 +57,7 @@ def generate_ai_response(
        - Always include a brief recommendation advising consultation with a certified Vaidya or medical professional.
     """
 
-    # 7. Initialize Model
-    try:
-        model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
-            system_instruction=system_instruction
-        )
-    except Exception:
-        model = genai.GenerativeModel(
-            model_name="gemini-1.5-pro",
-            system_instruction=system_instruction
-        )
-
-    # 8. Construct Payload & Generate Response
+    # 4. Construct Content Payload
     contents = []
     if image is not None:
         contents.append(image)
@@ -98,8 +77,38 @@ def generate_ai_response(
         else:
             contents.append(prompt_text)
 
+    # 5. Dynamically Discover Available Models from your API key
     try:
+        supported_models = [
+            m.name for m in genai.list_models() 
+            if 'generateContent' in m.supported_generation_methods
+        ]
+        
+        # Priority list of model names
+        target_model = None
+        for preferred in ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"]:
+            for available in supported_models:
+                if preferred in available:
+                    target_model = available
+                    break
+            if target_model:
+                break
+                
+        # Fallback to the first available model that supports generation
+        if not target_model and supported_models:
+            target_model = supported_models[0]
+            
+        if not target_model:
+            return "⚠️ **Model Error:** No content generation models found for this API key."
+
+        # Initialize the discovered model
+        model = genai.GenerativeModel(
+            model_name=target_model,
+            system_instruction=system_instruction
+        )
+        
         response = model.generate_content(contents)
         return response.text
+
     except Exception as e:
         return f"⚠️ **Error generating AI response:** {str(e)}"
